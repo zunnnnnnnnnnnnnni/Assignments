@@ -1,0 +1,202 @@
+# --------------------------------------------------------------
+# Name: Juned Khan
+# Course: BCA (AI & DS)
+# Semester: 1st
+# Subject: Problem Solving with Python
+# Assignment: Unit-5 Capstone Project
+# Title: Smart Student Performance Analyzer
+# Date: 10-11-2025
+# --------------------------------------------------------------
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+
+# ==============================================================
+# TASK 1: DATA LOADING AND VALIDATION
+# ==============================================================
+
+data_path = "data/student_scores.csv"
+
+try:
+    df = pd.read_csv(data_path)
+    print("✅ Data loaded successfully.")
+except FileNotFoundError:
+    print("❌ Error: 'student_scores.csv' not found in /data folder.")
+    exit()
+
+print("\n--- Dataset Preview ---")
+print(df.head())
+
+# Data info
+print("\n--- Info ---")
+print(df.info())
+
+# Clean missing values
+df = df.dropna(subset=["Name", "Subject", "Marks", "Attendance"])
+
+# Convert numeric columns
+df["Marks"] = pd.to_numeric(df["Marks"], errors="coerce").fillna(0)
+df["Attendance"] = pd.to_numeric(df["Attendance"], errors="coerce").fillna(0)
+
+# Validate marks
+df = df[(df["Marks"] >= 0) & (df["Marks"] <= 100)]
+
+df_students = df.copy()
+print("\n✅ Data cleaned and validated. Rows:", len(df_students))
+
+# ==============================================================
+# TASK 2: DATA PROCESSING & STATISTICAL ANALYSIS
+# ==============================================================
+
+print("\n--- Statistical Analysis ---")
+
+# Average marks per student
+avg_marks = df_students.groupby("Name")["Marks"].mean()
+
+# Highest/lowest marks per subject
+subject_stats = df_students.groupby("Subject")["Marks"].agg(["min", "max", "mean"]).round(2)
+
+# Standard deviation of marks
+marks_std = np.std(df_students["Marks"]).round(2)
+
+# Identify top & bottom 3 performers
+top3 = avg_marks.sort_values(ascending=False).head(3)
+bottom3 = avg_marks.sort_values().head(3)
+
+# Grade classification function
+def grade_category(marks):
+    if marks >= 85:
+        return "A"
+    elif marks >= 70:
+        return "B"
+    elif marks >= 50:
+        return "C"
+    else:
+        return "Fail"
+
+grades = avg_marks.apply(grade_category)
+
+summary_df = pd.DataFrame({
+    "Average Marks": avg_marks.round(2),
+    "Grade": grades
+}).reset_index()
+
+print(summary_df.head())
+
+# ==============================================================
+# TASK 3: OBJECT-ORIENTED MODELING
+# ==============================================================
+
+class Student:
+    def _init_(self, name, roll_no, gender):
+        self.name = name
+        self.roll_no = roll_no
+        self.gender = gender
+        self.marks = []
+
+    def add_marks(self, subject, marks):
+        self.marks.append((subject, marks))
+
+    def average(self):
+        if len(self.marks) == 0:
+            return 0
+        return sum(m for _, m in self.marks) / len(self.marks)
+
+    def _str_(self):
+        return f"{self.name} ({self.roll_no}) - Avg: {self.average():.2f}"
+
+class StudentManager:
+    def _init_(self):
+        self.students = []
+
+    def add_student(self, student):
+        self.students.append(student)
+
+    def get_summary(self):
+        for s in self.students:
+            print(s)
+
+    def save_report(self, filename):
+        try:
+            with open(filename, "w") as f:
+                for s in self.students:
+                    f.write(str(s) + "\n")
+            print(f"✅ Report saved to {filename}")
+        except Exception as e:
+            print("❌ Error saving report:", e)
+
+# Create Student objects
+manager = StudentManager()
+for _, row in df_students.iterrows():
+    stu = Student(row["Name"], row["Roll_No"], row["Gender"])
+    stu.add_marks(row["Subject"], row["Marks"])
+    manager.add_student(stu)
+
+# ==============================================================
+# TASK 4: VISUALIZATION USING MATPLOTLIB
+# ==============================================================
+
+plt.style.use("ggplot")
+fig, axs = plt.subplots(2, 2, figsize=(12, 8))
+
+# 1. Bar Chart - Average marks by student
+axs[0, 0].bar(summary_df["Name"], summary_df["Average Marks"], color="royalblue")
+axs[0, 0].set_title("Average Marks by Student")
+axs[0, 0].set_xticklabels(summary_df["Name"], rotation=45, ha="right")
+
+# 2. Pie Chart - Grade distribution
+grade_counts = grades.value_counts()
+axs[0, 1].pie(grade_counts, labels=grade_counts.index, autopct="%1.1f%%", startangle=140)
+axs[0, 1].set_title("Grade Distribution")
+
+# 3. Line Chart - Subject-wise average marks
+axs[1, 0].plot(subject_stats.index, subject_stats["mean"], marker="o", color="green")
+axs[1, 0].set_title("Subject-Wise Average Marks")
+axs[1, 0].set_xlabel("Subject")
+axs[1, 0].set_ylabel("Average Marks")
+
+# 4. Scatter Plot - Attendance vs Marks
+axs[1, 1].scatter(df_students["Attendance"], df_students["Marks"], alpha=0.6, color="red")
+axs[1, 1].set_title("Attendance vs Marks Correlation")
+axs[1, 1].set_xlabel("Attendance (%)")
+axs[1, 1].set_ylabel("Marks")
+
+plt.tight_layout()
+os.makedirs("output", exist_ok=True)
+plt.savefig("output/student_performance_dashboard.png")
+plt.close()
+print("📊 Visualization dashboard saved: output/student_performance_dashboard.png")
+
+# ==============================================================
+# TASK 5: FILE HANDLING, PERSISTENCE & REPORTING
+# ==============================================================
+
+try:
+    # Export cleaned data
+    df_students.to_csv("output/cleaned_student_data.csv", index=False)
+
+    # Generate summary insights
+    class_avg = df_students["Marks"].mean().round(2)
+    highest_student = avg_marks.idxmax()
+    lowest_subject = subject_stats["mean"].idxmin()
+
+    with open("output/performance_summary.txt", "w") as f:
+        f.write("SMART STUDENT PERFORMANCE ANALYZER\n")
+        f.write("=" * 40 + "\n\n")
+        f.write(f"Class Average: {class_avg}\n")
+        f.write(f"Highest Scoring Student: {highest_student}\n")
+        f.write(f"Subject with Lowest Average: {lowest_subject}\n\n")
+        f.write("Top 3 Performers:\n")
+        for name, marks in top3.items():
+            f.write(f"{name}: {marks:.2f}\n")
+        f.write("\nAttendance Trends:\n")
+        f.write(df_students["Attendance"].describe().to_string())
+
+    print("📝 Summary report generated: output/performance_summary.txt")
+
+except Exception as e:
+    print("❌ Error:", e)
+finally:
+    print("\n✅ Capstone project completed successfully!")
