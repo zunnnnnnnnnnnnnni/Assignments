@@ -1,0 +1,57 @@
+from hospital import HospitalManagement
+
+def main():
+    hospital = HospitalManagement()
+
+    while True:
+        print("\n========== HOSPITAL MANAGEMENT ==========")
+        print("1. Add Patient")
+        print("2. Add Doctor")
+        print("3. Assign Doctor to Patient")
+        print("4. Search Patient")
+        print("5. Search Doctor")
+        print("6. View All Patients")
+        print("7. View All Doctors")
+        print("8. Discharge Patient")
+        print("9. Exit")
+        print("=========================================")
+
+        choice = input("Enter choice (1-9): ")
+
+        try:
+            if choice == "1":
+                n = input("Patient Name: ")
+                a = int(input("Age: "))
+                pid = input("Patient ID: ")
+                dis = input("Disease: ")
+                hospital.add_patient(n, a, pid, dis)
+            elif choice == "2":
+                n = input("Doctor Name: ")
+                s = input("Specialization: ")
+                did = input("Doctor ID: ")
+                hospital.add_doctor(n, s, did)
+            elif choice == "3":
+                pid = input("Patient ID: ")
+                did = input("Doctor ID: ")
+                hospital.assign_doctor(pid, did)
+            elif choice == "4":
+                pid = input("Enter Patient ID: ")
+                hospital.search_patient_by_id(pid)
+            elif choice == "5":
+                did = input("Enter Doctor ID: ")
+                hospital.search_doctor_by_id(did)
+            elif choice == "6":
+                hospital.display_all_patients()
+            elif choice == "7":
+                hospital.display_all_doctors()
+            elif choice == "8":
+                pid = input("Enter Patient ID: ")
+                hospital.discharge_patient(pid)
+            elif choice == "9":
+                hospital.save_data()
+                print("💾 Data saved. Exiting system...")
+                break
+            else:
+                print("❌ Invalid option. Try again!")
+        except Exception as e:
+            print("⚠ Error:", e)
