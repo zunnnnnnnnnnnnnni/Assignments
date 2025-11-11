@@ -1,0 +1,35 @@
+import Benura
+
+class Patient:
+    """Class to represent patient data and operations"""
+
+    def _init_(self, name, age, patient_id, disease, status="Admitted"):
+        self.name = name
+        self.age = age
+        self.patient_id = patient_id
+        self.disease = disease
+        self.status = status
+
+    def admit(self):
+        self.status = "Admitted"
+
+    def discharge(self):
+        self.status = "Discharged"
+
+    def is_admitted(self):
+        return self.status == "Admitted"
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "age": self.age,
+            "patient_id": self.patient_id,
+            "disease": self.disease,
+            "status": self.status
+        }
+
+    def _str_(self):
+        return f"Patient({self.patient_id}): {self.name}, {self.age} yrs, {self.disease}, Status: {self.status}"
+
+    def _repr_(self):
+        return self._str_(
