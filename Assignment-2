@@ -1,0 +1,74 @@
+--------------------------------------------------------
+# Name: JUNED KHAN
+# Course: BCA (AI & DS)
+# Semester: 1st
+# Subject: Problem Solving with Python
+# Assignment: Unit-2 Mini Project
+# Title: Library Inventory & Borrowing System
+# Date: 10-11-2025
+# --------------------------------------------------------
+
+# ----- TASK 1: Menu Screen -----
+print("======================================")
+print("     WELCOME TO LIBRARY MANAGER CLI   ")
+print("======================================")
+
+books = {}
+borrowed = {}
+
+# ---------- FUNCTIONS ----------
+
+# Task 2: Add book details
+def add_book():
+    print("\n--- Add New Book ---")
+    book_id = input("Enter Book ID: ")
+    title = input("Enter Book Title: ")
+    author = input("Enter Author Name: ")
+    copies = int(input("Enter Number of Copies: "))
+    
+    books[book_id] = {"title": title, "author": author, "copies": copies}
+    print(f"✅ Book '{title}' added successfully!\n")
+
+# Task 3: Display all books
+def view_books():
+    print("\n--- Library Books List ---")
+    if not books:
+        print("No books in library yet.")
+    else:
+        print("ID\tTitle\t\tAuthor\t\tCopies")
+        print("-" * 45)
+        for book_id, info in books.items():
+            print(f"{book_id}\t{info['title'][:15]:15}\t{info['author'][:10]:10}\t{info['copies']}")
+    print()
+
+# Task 3: Search book by ID or Title
+def search_book():
+    print("\n--- Search Book ---")
+    choice = input("Search by (1) ID or (2) Title: ")
+    found = False
+    
+    if choice == "1":
+        bid = input("Enter Book ID: ")
+        if bid in books:
+            print(f"✅ Book Found: {books[bid]}")
+            found = True
+    elif choice == "2":
+        title_search = input("Enter part of book title: ").lower()
+        for bid, info in books.items():
+            if title_search in info['title'].lower():
+                print(f"✅ Found: ID={bid}, Title={info['title']}, Author={info['author']}, Copies={info['copies']}")
+                found = True
+    if not found:
+        print("❌ Book Not Found!")
+    print()
+
+# Task 4: Borrow Book
+def borrow_book():
+    print("\n--- Borrow Book ---")
+    student = input("Enter Student Name: ")
+    bid = input("Enter Book ID: ")
+    
+    if bid in books and books[bid]['copies'] > 0:
+        books[bid]['copies'] -= 1
+        borrowed[student] = bid
+        print(f"✅ {student}
